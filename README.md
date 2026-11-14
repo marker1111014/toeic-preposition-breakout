@@ -45,4 +45,8 @@
 ## 本地執行或部署
 
 - **本地遊玩**：直接以現代瀏覽器開啟 [`index.html`](./index.html) 即可（支援離線運作，所有題庫已內嵌，同時另附 [`data/toeic_preposition_bank.json`](./data/toeic_preposition_bank.json) 供資料檢視或擴充使用）。
+- **Cloudflare Workers（單檔複製貼上免 CLI）**：
+  1. 打開 [`worker.js`](./worker.js)（點 GitHub 右上角 **Copy raw file** 或 **Raw** 全選複製）。
+  2. 前往 Cloudflare Dashboard → **Workers & Pages → Create → Start with Hello World! → Edit code**。
+  3. 清空預設程式碼、貼上 `worker.js` 內容並點擊 **Deploy** 即可直接透過 `*.workers.dev` 遊玩。
 - **GitHub Pages**：至 Repository `Settings → Pages`，將 Source 設為 `Deploy from a branch`（`main` / `/ (root)`）即可生成線上遊玩網址。
