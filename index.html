@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>多益介係詞彈珠打磚塊 — TOEIC Preposition Breakout</title>
-  <meta name="description" content="針對多益高頻動詞與介係詞搭配設計的彈珠打磚塊復習遊戲，內含 48 題分級題庫、瞄準思考模式、即時浮動提示、右側複習面板與語音朗讀。" />
+  <title>多益介係詞雙模式特訓：打磚塊 ＆ 防衛槍戰 — TOEIC Preposition Arcade</title>
+  <meta name="description" content="針對多益高頻動詞與介係詞搭配設計的雙模式複習遊戲（彈珠打磚塊 ＋ 防衛槍戰），內含 48 題分級題庫、高解析畫面、即時文法提示、右側複習面板與語音朗讀。" />
   <style>
     :root {
       --background: #f4f6f9;
       --card: #ffffff;
-      --border: #d0d7de;
-      --card-border: #e5e9f0;
-      --foreground: #111827;
-      --muted-foreground: #6b7280;
+      --border: #cfd7e3;
+      --card-border: #e3e8f0;
+      --foreground: #0f172a;
+      --muted-foreground: #64748b;
       --primary: #1d4ed8;
       --primary-foreground: #ffffff;
       --secondary: #eef2f7;
@@ -27,8 +27,8 @@
       --chart-4: #0284c7;
       --chart-5: #16a34a;
       --chart-6: #e11d48;
-      --overlay-bg: rgba(244, 246, 249, 0.88);
-      --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+      --overlay-bg: rgba(244, 246, 249, 0.9);
+      --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
       --shadow-lg: 0 12px 30px rgba(15, 23, 42, 0.14);
     }
 
@@ -38,7 +38,7 @@
       --border: #30363d;
       --card-border: #262c36;
       --foreground: #f0f6fc;
-      --muted-foreground: #8b949e;
+      --muted-foreground: #9ca3af;
       --primary: #3b82f6;
       --primary-foreground: #ffffff;
       --secondary: #21262d;
@@ -53,7 +53,7 @@
       --chart-4: #38bdf8;
       --chart-5: #22c55e;
       --chart-6: #fb7185;
-      --overlay-bg: rgba(13, 17, 23, 0.88);
+      --overlay-bg: rgba(13, 17, 23, 0.9);
       --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.28);
       --shadow-lg: 0 14px 36px rgba(0, 0, 0, 0.45);
     }
@@ -295,27 +295,165 @@
 
     .muted { color: var(--muted-foreground); }
 
+    /* Hybrid Crisp DOM + 1:1 HiDPI Canvas Arena */
     .canvas-wrap {
       position: relative;
       width: 100%;
+      aspect-ratio: 760 / 540;
+      container-type: inline-size;
       border-radius: 10px;
       overflow: hidden;
       border: 1px solid var(--card-border);
       background: var(--background);
+      user-select: none;
     }
 
     canvas {
+      position: absolute;
+      inset: 0;
       display: block;
       width: 100%;
-      height: auto;
+      height: 100%;
       cursor: crosshair;
       touch-action: none;
+      z-index: 1;
+    }
+
+    .entity-layer, .floater-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .entity-layer { z-index: 2; }
+    .floater-layer { z-index: 3; }
+
+    /* Razor-sharp DOM Brick & Enemy Cards */
+    .target-card {
+      position: absolute;
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 8px;
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+      transition: border-color 0.12s ease, box-shadow 0.12s ease, opacity 0.15s ease;
+      overflow: hidden;
+    }
+
+    .target-card.aim-target {
+      border-color: var(--primary);
+      border-width: 2px;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+    }
+
+    .target-card.hit-error {
+      border-color: var(--error);
+      border-width: 2px;
+      animation: brickShake 0.28s ease;
+    }
+
+    .target-card .group-stripe {
+      position: absolute;
+      left: 5px;
+      top: 9px;
+      bottom: 9px;
+      width: 4px;
+      border-radius: 2px;
+    }
+
+    .target-stem {
+      font-size: clamp(10px, 1.3vw, 14px);
+      font-size: clamp(10px, 1.82cqw, 14px);
+      font-weight: 700;
+      color: var(--foreground);
+      line-height: 1.18;
+      letter-spacing: -0.01em;
+      max-width: 100%;
+      word-break: normal;
+      overflow-wrap: break-word;
+    }
+
+    .target-stem.long-stem {
+      font-size: clamp(9.5px, 1.15vw, 12.5px);
+      font-size: clamp(9.5px, 1.62cqw, 12.5px);
+    }
+
+    .target-zh {
+      font-size: clamp(9.5px, 1.1vw, 12.5px);
+      font-size: clamp(9.5px, 1.55cqw, 12.5px);
+      font-weight: 500;
+      color: var(--muted-foreground);
+      line-height: 1.25;
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    .enemy-danger-bar {
+      position: absolute;
+      left: 8px;
+      right: 8px;
+      bottom: 4px;
+      height: 3px;
+      border-radius: 99px;
+      background: var(--card-border);
+      overflow: hidden;
+    }
+
+    .enemy-danger-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 99px;
+      background: var(--primary);
+      transition: background-color 0.2s ease;
+    }
+
+    /* Crisp DOM Floating Toasts */
+    .floater-toast {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      background: var(--card);
+      border-radius: 8px;
+      padding: 6px 12px;
+      min-width: 160px;
+      max-width: min(340px, 86%);
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+      animation: floatUpFade 1.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .floater-toast.success { border: 1.5px solid var(--success); }
+    .floater-toast.error { border: 1.5px solid var(--error); animation-duration: 1.95s; }
+
+    .floater-title {
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+    .floater-toast.success .floater-title { color: var(--success); }
+    .floater-toast.error .floater-title { color: var(--error); }
+
+    .floater-sub {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--foreground);
+      margin-top: 1px;
+      line-height: 1.35;
     }
 
     /* Overlay */
     .overlay-modal {
       position: absolute;
       inset: 0;
+      z-index: 10;
       background: var(--overlay-bg);
       backdrop-filter: blur(4px);
       display: flex;
@@ -383,7 +521,7 @@
     .btn-primary:hover { opacity: 0.9; }
     .btn-primary.hidden { display: none; }
 
-    /* Ball Rack */
+    /* Ball / Bullet Rack */
     .rack-section { display: flex; flex-direction: column; gap: 8px; }
     .rack-header {
       display: flex;
@@ -590,6 +728,20 @@
       0% { opacity: 0; transform: translateY(-6px) scale(0.98); }
       100% { opacity: 1; transform: translateY(0) scale(1); }
     }
+
+    @keyframes brickShake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      55% { transform: translateX(5px); }
+      80% { transform: translateX(-3px); }
+    }
+
+    @keyframes floatUpFade {
+      0% { opacity: 0; transform: translate(-50%, -35%) scale(0.95); }
+      12% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      75% { opacity: 1; transform: translate(-50%, -82%) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -105%) scale(0.98); }
+    }
   </style>
 </head>
 <body>
@@ -600,19 +752,34 @@
       <div class="header-top">
         <div>
           <h1 class="brand-title">
-            <span>TOEIC 介係詞打磚塊</span>
+            <span>TOEIC 介係詞特訓遊戲</span>
             <span class="badge-pill">48 題分級題庫</span>
           </h1>
           <p class="brand-subtitle">
-            選好下方介係詞球，瞄準對應動詞／片語磚塊發射；擊中即時浮動提示、自動朗讀並收入右側複習筆記。
+            支援「彈珠打磚塊」與「防衛槍戰」雙模式；擊中即時浮動文法解析、語音朗讀並收入右側複習筆記。
           </p>
         </div>
 
         <div class="controls-row">
-          <div class="segmented" role="group" aria-label="操控模式">
+          <!-- Game Switcher -->
+          <div class="segmented" role="group" aria-label="遊戲種類">
+            <button id="gameBreakoutBtn" type="button" class="seg-btn active">打磚塊</button>
+            <button id="gameShooterBtn" type="button" class="seg-btn">防衛槍戰</button>
+          </div>
+
+          <!-- Sub-mode for Breakout -->
+          <div id="breakoutSubControls" class="segmented" role="group" aria-label="打磚塊操控模式">
             <button id="modeAimBtn" type="button" class="seg-btn active">瞄準思考</button>
             <button id="modeArcadeBtn" type="button" class="seg-btn">街機連彈</button>
           </div>
+
+          <!-- Sub-mode for Shooter -->
+          <div id="shooterSubControls" class="segmented hidden" role="group" aria-label="槍戰掉落速度">
+            <button id="speedSlowBtn" type="button" class="seg-btn active">慢速</button>
+            <button id="speedNormalBtn" type="button" class="seg-btn">標準</button>
+            <button id="speedFastBtn" type="button" class="seg-btn">極速</button>
+          </div>
+
           <button id="ttsModeBtn" type="button" class="ctrl-btn" title="切換語音朗讀內容">語音：片語</button>
           <button id="sfxBtn" type="button" class="ctrl-btn" title="開啟或關閉音效">音效：開</button>
           <button id="themeBtn" type="button" class="ctrl-btn" title="切換深色／淺色主題">深色主題</button>
@@ -642,8 +809,10 @@
           <span id="modeHint" class="muted"></span>
         </div>
 
-        <div class="canvas-wrap">
+        <div id="canvasWrap" class="canvas-wrap">
           <canvas id="gameCanvas"></canvas>
+          <div id="entityLayer" class="entity-layer"></div>
+          <div id="floaterLayer" class="floater-layer"></div>
 
           <div id="overlayModal" class="overlay-modal hidden">
             <div class="overlay-box">
@@ -677,8 +846,8 @@
 
         <div class="rack-section">
           <div class="rack-header">
-            <span class="rack-title">選擇介係詞球（點擊、數字鍵 1–9 或滾輪切換）：</span>
-            <span class="muted">A / D 或 ← / → 移動擋板・點擊或空白鍵發射</span>
+            <span id="rackTitle" class="rack-title">選擇介係詞球（點擊、數字鍵 1–9 或滾輪切換）：</span>
+            <span id="rackControlsHint" class="muted">A / D 或 ← / → 移動擋板・點擊或空白鍵發射</span>
           </div>
           <div id="ballRack" class="ball-rack"></div>
         </div>
@@ -777,10 +946,10 @@
         desc: "6 個中文直譯陷阱（須用 Ø 球）混搭 6 個近義真介係詞，內含干擾球 about！",
         balls: ["Ø", "with", "to", "for", "at", "on", "about"],
         items: [
-          { id: "4-1", stem: "discuss ___ the plan", zh: "討論計畫", prep: "Ø", full: "discuss + N", meaning: "討論（及物動詞，不加 about）", example: "Let us discuss the quarterly budget before Friday's meeting.", note: "discuss 本身含「談論關於」，加 about 為經典文法錯誤。", trapHints: { about: "陷阱！discuss 為及物動詞，不可加 about，請改用 Ø 球！" } },
+          { id: "4-1", stem: "discuss ___ the plan", zh: "討論計畫", prep: "Ø", full: "discuss + N", meaning: "討論（及物動詞，不加 about）", example: "Let us discuss the quarterly budget before Friday's meeting.", note: "discuss 本身含「談論關於」，加 about 為經典文法錯誤。", trapHints: { about: "陷阱！discuss 為及物動詞，不可加 about，請改用 Ø！" } },
           { id: "4-2", stem: "contact ___ the vendor", zh: "聯繫廠商", prep: "Ø", full: "contact + sb", meaning: "聯繫（作動詞不加 with）", example: "Please contact the regional manager if the shipment is late.", note: "名詞才說 have contact with；動詞直接用 contact + 人。", trapHints: { with: "陷阱！contact 作「動詞」直接接受詞，不可加 with，改用 Ø！" } },
           { id: "4-3", stem: "communicate ___ the vendor", zh: "與廠商溝通", prep: "with", full: "communicate with", meaning: "與…溝通（對照組：需加 with）", example: "We communicate with overseas partners via video calls.", note: "對比 contact：communicate 表雙向溝通需配 with。", trapHints: { "Ø": "communicate 表「與某人溝通」時為不及物動詞，須配 with！" } },
-          { id: "4-4", stem: "attend ___ the briefing", zh: "出席簡報", prep: "Ø", full: "attend + 活動", meaning: "出席（直接接活動，不加 at/to）", example: "All department heads are required to attend the morning briefing.", note: "表「出席會議/課程」時為及物動詞。", trapHints: { to: "表「出席活動」直接用 attend + 活動（Ø 球）；attend to 才是「照料/處理」！" } },
+          { id: "4-4", stem: "attend ___ the briefing", zh: "出席簡報", prep: "Ø", full: "attend + 活動", meaning: "出席（直接接活動，不加 at/to）", example: "All department heads are required to attend the morning briefing.", note: "表「出席會議/課程」時為及物動詞。", trapHints: { to: "表「出席活動」直接用 attend + 活動（Ø）；attend to 才是「照料/處理」！" } },
           { id: "4-5", stem: "attend ___ urgent orders", zh: "處理急件", prep: "to", full: "attend to", meaning: "專心處理、照料（對照組）", example: "Ms. Lin will attend to urgent customer orders this afternoon.", note: "與 attend + 會議 區分：attend to 意指處理事務或服務賓客。", trapHints: { "Ø": "這裡是「處理急件」不是「出席」，固定片語為 attend to！" } },
           { id: "4-6", stem: "await ___ approval", zh: "靜候核准", prep: "Ø", full: "await + N", meaning: "等候（await = wait for，不加 for）", example: "The construction team is awaiting final city approval.", note: "正式書信常用 await + 名詞，不可重複加 for。", trapHints: { for: "陷阱！await 已包含 for 的語意（= wait for），不可加 for，用 Ø！" } },
           { id: "4-7", stem: "wait ___ approval", zh: "等待核准", prep: "for", full: "wait for", meaning: "等待（對照組：須配 for）", example: "Applicants must wait for written confirmation by email.", note: "對比 await：wait 後接等待對象須配 for。", trapHints: { "Ø": "wait 為不及物動詞，等待某事物須配 for！" } },
@@ -794,7 +963,7 @@
     ];
 
     // =========================================================================
-    // 2. Game State & Theme Color Resolution
+    // 2. Constants & Shared State
     // =========================================================================
     const CANVAS_W = 760;
     const CANVAS_H = 540;
@@ -804,21 +973,34 @@
     const BALL_R = 13;
     const BALL_SPEED = 540;
 
+    // Shooter constants
+    const DEFENSE_Y = CANVAS_H - 64;
+    const TURRET_Y = CANVAS_H - 30;
+    const BULLET_SPEED = 720;
+    const ENEMY_W = 169;
+    const ENEMY_H = 62;
+    const SHOOTER_LANES = [24, 205, 386, 567];
+    const SHOOTER_SPEEDS = { slow: 19, normal: 29, fast: 42 };
+
     const state = {
+      gameType: "breakout", // 'breakout' | 'shooter'
       levelIdx: 0,
       isMistakeDrill: false,
-      mode: "aim",
-      ttsMode: "phrase",
+      mode: "aim", // 'aim' | 'arcade'
+      shooterSpeed: "slow", // 'slow' | 'normal' | 'fast'
+      ttsMode: "phrase", // 'phrase' | 'sentence' | 'off'
       sfxEnabled: true,
       theme: window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light",
       activeTab: "matched",
       hideBankAnswers: false,
 
       currentLevel: null,
+      lastOrderIds: [],
       bricks: [],
       availableBalls: [],
       selectedBall: "with",
 
+      // Breakout state
       paddleX: CANVAS_W / 2,
       aimAngle: -Math.PI / 2,
       ball: {
@@ -831,12 +1013,20 @@
       },
       arcadeCooldownUntil: 0,
 
+      // Shooter state
+      turretX: CANVAS_W / 2,
+      turretAngle: -Math.PI / 2,
+      enemies: [],
+      spawnQueue: [],
+      bullets: [],
+      lastShotAt: 0,
+      lastSpawnCheck: 0,
+      shooterClearedCount: 0,
+
       keys: { left: false, right: false },
       mouse: { x: CANVAS_W / 2, y: CANVAS_H / 2, inside: false },
 
-      floaters: [],
       particles: [],
-
       matchedLog: [],
       mistakeLog: [],
       mistakeItemIds: new Set(),
@@ -849,7 +1039,10 @@
       levelCleared: false
     };
 
+    const canvasWrap = document.getElementById("canvasWrap");
     const canvas = document.getElementById("gameCanvas");
+    const entityLayer = document.getElementById("entityLayer");
+    const floaterLayer = document.getElementById("floaterLayer");
     const ctx = canvas.getContext("2d");
     const probe = document.getElementById("colorProbe");
     let themeColors = {};
@@ -874,9 +1067,9 @@
       themeColors = {
         bg: resolveVar("--background", isDark ? "#0d1117" : "#f4f6f9"),
         card: resolveVar("--card", isDark ? "#161b22" : "#ffffff"),
-        border: resolveVar("--border", isDark ? "#30363d" : "#d0d7de"),
-        fg: resolveVar("--foreground", isDark ? "#f0f6fc" : "#111827"),
-        muted: resolveVar("--muted-foreground", isDark ? "#8b949e" : "#6b7280"),
+        border: resolveVar("--border", isDark ? "#30363d" : "#cfd7e3"),
+        fg: resolveVar("--foreground", isDark ? "#f0f6fc" : "#0f172a"),
+        muted: resolveVar("--muted-foreground", isDark ? "#9ca3af" : "#64748b"),
         primary: resolveVar("--primary", isDark ? "#3b82f6" : "#1d4ed8"),
         success: resolveVar("--success", isDark ? "#22c55e" : "#15803d"),
         warning: resolveVar("--warning", isDark ? "#f59e0b" : "#b45309"),
@@ -892,12 +1085,24 @@
       };
     }
 
-    function resizeCanvasHiDPI() {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = CANVAS_W * dpr;
-      canvas.height = CANVAS_H * dpr;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // 1:1 Device-Pixel Canvas Synchronization (Eliminates scaling blur!)
+    function syncCanvasResolution() {
+      const rect = canvasWrap.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      const dpr = window.devicePixelRatio || 1;
+      const targetW = Math.round(rect.width * dpr);
+      const targetH = Math.round(rect.height * dpr);
+      if (canvas.width !== targetW || canvas.height !== targetH) {
+        canvas.width = targetW;
+        canvas.height = targetH;
+      }
+      ctx.setTransform(targetW / CANVAS_W, 0, 0, targetH / CANVAS_H, 0, 0);
     }
+
+    if (typeof ResizeObserver !== "undefined") {
+      new ResizeObserver(syncCanvasResolution).observe(canvasWrap);
+    }
+    window.addEventListener("resize", syncCanvasResolution);
 
     // =========================================================================
     // 3. Audio (Web Audio SFX + Web Speech API TTS)
@@ -940,6 +1145,14 @@
           gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
           osc.start(now);
           osc.stop(now + 0.19);
+        } else if (type === "shoot") {
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(620, now);
+          osc.frequency.exponentialRampToValueAtTime(280, now + 0.08);
+          gain.gain.setValueAtTime(0.08, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+          osc.start(now);
+          osc.stop(now + 0.095);
         } else if (type === "bounce") {
           osc.type = "sine";
           osc.frequency.setValueAtTime(320, now);
@@ -987,11 +1200,12 @@
     }
 
     // =========================================================================
-    // 4. Level Loading & Brick Layout
+    // 4. Shuffle & DOM Entity Builders
     // =========================================================================
     const BALL_COLOR_MAP = {
       with: 0, to: 1, for: 2, in: 3, on: 4, of: 5, from: 0, by: 1, into: 2, at: 3, "Ø": 4, about: 5
     };
+    const GROUP_COLOR_MAP = { apply: "for", look: "in", result: "on", agree: "to", consist: "of" };
 
     function getBallColor(prep) {
       if (!themeColors.charts) return "#2563eb";
@@ -1001,6 +1215,112 @@
       return themeColors.charts[idx % themeColors.charts.length];
     }
 
+    // Always produce a freshly shuffled order distinct from the previous attempt
+    function shuffleItems(items, prevIds = []) {
+      const arr = [...items];
+      for (let attempt = 0; attempt < 6; attempt++) {
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        const nextIds = arr.map((x) => x.id);
+        const same = prevIds.length === nextIds.length && nextIds.every((id, idx) => id === prevIds[idx]);
+        if (!same || arr.length <= 1) break;
+      }
+      return arr;
+    }
+
+    function createTargetElement(item, x, y, w, h, isEnemy = false) {
+      const el = document.createElement("div");
+      el.className = "target-card";
+      el.style.left = `${(x / CANVAS_W) * 100}%`;
+      el.style.top = `${(y / CANVAS_H) * 100}%`;
+      el.style.width = `${(w / CANVAS_W) * 100}%`;
+      el.style.height = `${(h / CANVAS_H) * 100}%`;
+
+      if (item.group) {
+        const stripe = document.createElement("span");
+        stripe.className = "group-stripe";
+        stripe.style.backgroundColor = getBallColor(GROUP_COLOR_MAP[item.group] || "with");
+        el.appendChild(stripe);
+        el.style.paddingLeft = "14px";
+      }
+
+      const stemEl = document.createElement("div");
+      stemEl.className = item.stem.length >= 21 ? "target-stem long-stem" : "target-stem";
+      stemEl.textContent = item.stem;
+      el.appendChild(stemEl);
+
+      const zhEl = document.createElement("div");
+      zhEl.className = "target-zh";
+      zhEl.textContent = `(${item.zh})`;
+      el.appendChild(zhEl);
+
+      let dangerFill = null;
+      if (isEnemy) {
+        const bar = document.createElement("div");
+        bar.className = "enemy-danger-bar";
+        dangerFill = document.createElement("div");
+        dangerFill.className = "enemy-danger-fill";
+        bar.appendChild(dangerFill);
+        el.appendChild(bar);
+      }
+
+      entityLayer.appendChild(el);
+      return { el, dangerFill };
+    }
+
+    function addFloater(x, y, text, subtext, isSuccess) {
+      const el = document.createElement("div");
+      el.className = `floater-toast ${isSuccess ? "success" : "error"}`;
+      const clampedX = Math.max(120, Math.min(CANVAS_W - 120, x));
+      const clampedY = Math.max(46, Math.min(CANVAS_H - 60, y));
+      el.style.left = `${(clampedX / CANVAS_W) * 100}%`;
+      el.style.top = `${(clampedY / CANVAS_H) * 100}%`;
+
+      const titleEl = document.createElement("div");
+      titleEl.className = "floater-title";
+      titleEl.textContent = text;
+
+      const subEl = document.createElement("div");
+      subEl.className = "floater-sub";
+      subEl.textContent = subtext;
+
+      el.append(titleEl, subEl);
+      floaterLayer.appendChild(el);
+
+      const duration = isSuccess ? 1550 : 1950;
+      setTimeout(() => { el.remove(); }, duration);
+    }
+
+    function spawnParticles(cx, cy, color) {
+      for (let i = 0; i < 14; i++) {
+        const a = (Math.PI * 2 * i) / 14 + Math.random() * 0.3;
+        const spd = 90 + Math.random() * 180;
+        state.particles.push({
+          x: cx,
+          y: cy,
+          vx: Math.cos(a) * spd,
+          vy: Math.sin(a) * spd,
+          r: 2.5 + Math.random() * 3,
+          color,
+          born: performance.now(),
+          duration: 460
+        });
+      }
+    }
+
+    function triggerErrorShake(el) {
+      if (!el) return;
+      el.classList.remove("hit-error");
+      void el.offsetWidth;
+      el.classList.add("hit-error");
+      setTimeout(() => el.classList.remove("hit-error"), 320);
+    }
+
+    // =========================================================================
+    // 5. Level Loading (Both Breakout & Shooter)
+    // =========================================================================
     function loadLevel(idx, mistakeItems = null) {
       state.isMistakeDrill = Boolean(mistakeItems);
       if (!mistakeItems) state.levelIdx = idx;
@@ -1018,43 +1338,17 @@
 
       state.currentLevel = sourceLevel;
       state.availableBalls = sourceLevel.balls;
-      state.selectedBall = sourceLevel.balls[0];
-
-      const cols = 4;
-      const padX = 24;
-      const padTop = 26;
-      const gapX = 12;
-      const gapY = 12;
-      const brickW = (CANVAS_W - padX * 2 - gapX * (cols - 1)) / cols;
-      const brickH = 66;
-
-      const itemsCopy = [...sourceLevel.items];
-      if (sourceLevel.id !== "lv2") {
-        for (let i = itemsCopy.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [itemsCopy[i], itemsCopy[j]] = [itemsCopy[j], itemsCopy[i]];
-        }
+      if (!state.availableBalls.includes(state.selectedBall)) {
+        state.selectedBall = sourceLevel.balls[0];
       }
 
-      state.bricks = itemsCopy.map((item, i) => {
-        const col = i % cols;
-        const row = Math.floor(i / cols);
-        return {
-          item,
-          x: padX + col * (brickW + gapX),
-          y: padTop + row * (brickH + gapY),
-          w: brickW,
-          h: brickH,
-          alive: true,
-          shakeUntil: 0,
-          flashUntil: 0
-        };
-      });
+      // Shuffle all levels including Lv.2 so every retry refreshes positions
+      const shuffled = shuffleItems(sourceLevel.items, state.lastOrderIds);
+      state.lastOrderIds = shuffled.map((x) => x.id);
 
-      state.paddleX = CANVAS_W / 2;
-      state.aimAngle = -Math.PI / 2;
-      dockBall();
-      state.floaters = [];
+      // Clear DOM entity & floater layers
+      entityLayer.innerHTML = "";
+      floaterLayer.innerHTML = "";
       state.particles = [];
       state.matchedLog = [];
       state.attempts = 0;
@@ -1064,7 +1358,50 @@
       state.gameOver = false;
       state.levelCleared = false;
 
+      // Reset Breakout entities
+      state.bricks = [];
+      state.paddleX = CANVAS_W / 2;
+      state.aimAngle = -Math.PI / 2;
+      dockBall();
+
+      // Reset Shooter entities
+      state.enemies = [];
+      state.spawnQueue = [];
+      state.bullets = [];
+      state.turretX = CANVAS_W / 2;
+      state.turretAngle = -Math.PI / 2;
+      state.shooterClearedCount = 0;
+      state.lastSpawnCheck = performance.now();
+
+      if (state.gameType === "breakout") {
+        const cols = 4;
+        const padX = 24;
+        const padTop = 26;
+        const gapX = 12;
+        const gapY = 12;
+        const brickW = (CANVAS_W - padX * 2 - gapX * (cols - 1)) / cols;
+        const brickH = 66;
+
+        state.bricks = shuffled.map((item, i) => {
+          const col = i % cols;
+          const row = Math.floor(i / cols);
+          const x = padX + col * (brickW + gapX);
+          const y = padTop + row * (brickH + gapY);
+          const { el } = createTargetElement(item, x, y, brickW, brickH, false);
+          return { item, x, y, w: brickW, h: brickH, alive: true, el };
+        });
+      } else {
+        state.spawnQueue = [...shuffled];
+        // Spawn initial 3 enemies across distinct lanes with staggered Y
+        const initialLanes = shuffleItems([0, 1, 2, 3]);
+        const startYs = [-4, -44, -84];
+        for (let i = 0; i < 3 && state.spawnQueue.length > 0; i++) {
+          spawnEnemyInLane(initialLanes[i], startYs[i]);
+        }
+      }
+
       document.getElementById("overlayModal").classList.add("hidden");
+      syncCanvasResolution();
       renderLevelTabs();
       renderBallRack();
       updateHeaderUI();
@@ -1081,6 +1418,7 @@
     }
 
     function launchBall() {
+      if (state.gameType !== "breakout") return;
       if (!state.ball.docked || state.gameOver || state.levelCleared) return;
       getAudioCtx();
       const angle = state.aimAngle;
@@ -1092,31 +1430,31 @@
     }
 
     // =========================================================================
-    // 5. Raycast Preview for Aim Laser (with 1 wall bounce)
+    // 6. Raycasting & Aim Targets (Breakout + Shooter)
     // =========================================================================
-    function raycastSegment(ox, oy, dx, dy, bricks) {
+    function raycastSegment(ox, oy, dx, dy, targets, expandRadius) {
       let bestT = Infinity;
       let hitType = null;
-      let hitBrick = null;
+      let hitTarget = null;
 
       if (dx < -1e-6) {
-        const t = (BALL_R - ox) / dx;
+        const t = (expandRadius - ox) / dx;
         if (t > 1 && t < bestT) { bestT = t; hitType = "wall"; }
       } else if (dx > 1e-6) {
-        const t = (CANVAS_W - BALL_R - ox) / dx;
+        const t = (CANVAS_W - expandRadius - ox) / dx;
         if (t > 1 && t < bestT) { bestT = t; hitType = "wall"; }
       }
       if (dy < -1e-6) {
-        const t = (BALL_R - oy) / dy;
+        const t = (expandRadius - oy) / dy;
         if (t > 1 && t < bestT) { bestT = t; hitType = "top"; }
       }
 
-      for (const b of bricks) {
+      for (const b of targets) {
         if (!b.alive) continue;
-        const minX = b.x - BALL_R;
-        const maxX = b.x + b.w + BALL_R;
-        const minY = b.y - BALL_R;
-        const maxY = b.y + b.h + BALL_R;
+        const minX = b.x - expandRadius;
+        const maxX = b.x + b.w + expandRadius;
+        const minY = b.y - expandRadius;
+        const maxY = b.y + b.h + expandRadius;
 
         if (Math.abs(dx) < 1e-8 && (ox < minX || ox > maxX)) continue;
 
@@ -1132,66 +1470,89 @@
 
         if (tmax >= Math.max(0, tmin) && tmin > 1 && tmin < bestT) {
           bestT = tmin;
-          hitType = "brick";
-          hitBrick = b;
+          hitType = "target";
+          hitTarget = b;
         }
       }
 
-      return { x: ox + dx * bestT, y: oy + dy * bestT, hitType, hitBrick };
+      return { x: ox + dx * bestT, y: oy + dy * bestT, hitType, hitTarget };
     }
 
-    function computeAimPreview() {
+    function computeBreakoutAimPreview() {
       const dx = Math.cos(state.aimAngle);
       const dy = Math.sin(state.aimAngle);
-      const seg1 = raycastSegment(state.ball.x, state.ball.y, dx, dy, state.bricks);
+      const seg1 = raycastSegment(state.ball.x, state.ball.y, dx, dy, state.bricks, BALL_R);
       const points = [{ x: state.ball.x, y: state.ball.y }, { x: seg1.x, y: seg1.y }];
-      let targetBrick = seg1.hitBrick;
+      let targetBrick = seg1.hitTarget;
 
       if (seg1.hitType === "wall") {
-        const seg2 = raycastSegment(seg1.x, seg1.y, -dx, dy, state.bricks);
+        const seg2 = raycastSegment(seg1.x, seg1.y, -dx, dy, state.bricks, BALL_R);
         points.push({ x: seg2.x, y: seg2.y });
-        targetBrick = seg2.hitBrick;
+        targetBrick = seg2.hitTarget;
       }
       return { points, targetBrick };
     }
 
-    // =========================================================================
-    // 6. Physics & Collision Resolution
-    // =========================================================================
-    function addFloater(x, y, text, subtext, isSuccess) {
-      state.floaters.push({
-        x: Math.max(105, Math.min(CANVAS_W - 105, x)),
-        y,
-        text,
-        subtext,
-        isSuccess,
-        born: performance.now(),
-        duration: isSuccess ? 1450 : 1850
-      });
+    function computeShooterAimPreview() {
+      const dx = Math.cos(state.turretAngle);
+      const dy = Math.sin(state.turretAngle);
+      const barrelLen = 24;
+      const sx = state.turretX + dx * barrelLen;
+      const sy = TURRET_Y + dy * barrelLen;
+      const seg = raycastSegment(sx, sy, dx, dy, state.enemies, 6);
+      return {
+        points: [{ x: sx, y: sy }, { x: seg.x, y: seg.y }],
+        targetEnemy: seg.hitTarget
+      };
     }
 
-    function spawnParticles(cx, cy, color) {
-      for (let i = 0; i < 14; i++) {
-        const a = (Math.PI * 2 * i) / 14 + Math.random() * 0.3;
-        const spd = 80 + Math.random() * 170;
-        state.particles.push({
-          x: cx,
-          y: cy,
-          vx: Math.cos(a) * spd,
-          vy: Math.sin(a) * spd,
-          r: 2.5 + Math.random() * 3,
-          color,
-          born: performance.now(),
-          duration: 460
-        });
+    // =========================================================================
+    // 7. Match / Mistake Recording Shared Logic
+    // =========================================================================
+    function recordCorrectMatch(item, cx, cy) {
+      state.combo += 1;
+      if (state.combo > state.maxCombo) state.maxCombo = state.combo;
+
+      spawnParticles(cx, cy, themeColors.success);
+      addFloater(cx, cy, `✓ ${item.full}`, item.zh, true);
+      playSFX("hit");
+      speakItem(item);
+
+      state.matchedLog.unshift({ item });
+      renderPanel();
+    }
+
+    function recordWrongAttempt(item, chosen, cx, cy, targetEl, customReason = null) {
+      state.combo = 0;
+      triggerErrorShake(targetEl);
+
+      const trapMsg = customReason || (
+        (item.trapHints && item.trapHints[chosen])
+          ? item.trapHints[chosen]
+          : `${item.stem.replace("___", "")} 不搭配 ${chosen}`
+      );
+
+      addFloater(cx, cy, chosen ? `✗ 誤選 ${chosen}` : "⚠ 防線被突破", trapMsg, false);
+      playSFX("wrong");
+
+      if (!state.mistakeItemIds.has(item.id)) {
+        state.mistakeItemIds.add(item.id);
+        state.mistakeLog.unshift({ item, wrongPrep: chosen || "漏接", reason: trapMsg });
+      } else {
+        const existing = state.mistakeLog.find((m) => m.item.id === item.id);
+        if (existing) {
+          existing.wrongPrep = chosen || "漏接";
+          existing.reason = trapMsg;
+        }
       }
+      renderPanel();
     }
 
+    // =========================================================================
+    // 8. Breakout Physics
+    // =========================================================================
     function handleBrickHit(brick) {
       const now = performance.now();
-      const item = brick.item;
-      const chosen = state.selectedBall;
-
       if (state.mode === "aim" && state.ball.cooling) return;
       if (state.mode === "arcade" && now < state.arcadeCooldownUntil) return;
 
@@ -1199,22 +1560,15 @@
       else state.arcadeCooldownUntil = now + 260;
 
       state.attempts += 1;
-      const isCorrect = chosen === item.prep;
+      const item = brick.item;
+      const chosen = state.selectedBall;
+      const cx = brick.x + brick.w / 2;
+      const cy = brick.y + brick.h / 2;
 
-      if (isCorrect) {
+      if (chosen === item.prep) {
         brick.alive = false;
-        state.combo += 1;
-        if (state.combo > state.maxCombo) state.maxCombo = state.combo;
-
-        const cx = brick.x + brick.w / 2;
-        const cy = brick.y + brick.h / 2;
-        spawnParticles(cx, cy, themeColors.success);
-        addFloater(cx, cy, `✓ ${item.full}`, item.zh, true);
-        playSFX("hit");
-        speakItem(item);
-
-        state.matchedLog.unshift({ item });
-        renderPanel();
+        brick.el.remove();
+        recordCorrectMatch(item, cx, cy);
 
         if (state.bricks.every((b) => !b.alive)) {
           state.levelCleared = true;
@@ -1223,36 +1577,12 @@
           showOverlay(true);
         }
       } else {
-        state.combo = 0;
-        brick.shakeUntil = now + 320;
-        brick.flashUntil = now + 380;
-
-        const trapMsg = (item.trapHints && item.trapHints[chosen])
-          ? item.trapHints[chosen]
-          : `${item.stem.replace("___", "")} 不搭配 ${chosen}`;
-
-        const cx = brick.x + brick.w / 2;
-        const cy = brick.y + brick.h / 2;
-        addFloater(cx, cy, `✗ 誤選 ${chosen}`, trapMsg, false);
-        playSFX("wrong");
-
-        if (!state.mistakeItemIds.has(item.id)) {
-          state.mistakeItemIds.add(item.id);
-          state.mistakeLog.unshift({ item, wrongPrep: chosen, reason: trapMsg });
-        } else {
-          const existing = state.mistakeLog.find((m) => m.item.id === item.id);
-          if (existing) {
-            existing.wrongPrep = chosen;
-            existing.reason = trapMsg;
-          }
-        }
-        renderPanel();
+        recordWrongAttempt(item, chosen, cx, cy, brick.el);
       }
-
       updateHeaderUI();
     }
 
-    function updatePhysics(dt) {
+    function updateBreakoutPhysics(dt) {
       const paddleSpeed = 520;
       if (state.keys.left) state.paddleX -= paddleSpeed * dt;
       if (state.keys.right) state.paddleX += paddleSpeed * dt;
@@ -1370,7 +1700,198 @@
     }
 
     // =========================================================================
-    // 7. Canvas Rendering
+    // 9. Gun Battle (Shooter) Physics
+    // =========================================================================
+    function spawnEnemyInLane(laneIdx, startY = -ENEMY_H - 8) {
+      if (state.spawnQueue.length === 0) return false;
+      const item = state.spawnQueue.shift();
+      const x = SHOOTER_LANES[laneIdx];
+      const { el, dangerFill } = createTargetElement(item, x, startY, ENEMY_W, ENEMY_H, true);
+      state.enemies.push({
+        item,
+        lane: laneIdx,
+        x,
+        y: startY,
+        w: ENEMY_W,
+        h: ENEMY_H,
+        alive: true,
+        el,
+        dangerFill
+      });
+      return true;
+    }
+
+    function trySpawnShooterEnemy() {
+      if (state.spawnQueue.length === 0) return;
+      const aliveEnemies = state.enemies.filter((e) => e.alive);
+      if (aliveEnemies.length >= 4) return;
+
+      // If arena is momentarily clear, immediately drop up to 2 enemies so player stays engaged
+      if (aliveEnemies.length === 0) {
+        const lanes = shuffleItems([0, 1, 2, 3]);
+        spawnEnemyInLane(lanes[0], -10);
+        if (state.spawnQueue.length > 0) {
+          spawnEnemyInLane(lanes[1], -50);
+        }
+        return;
+      }
+
+      // Find lanes whose highest enemy has cleared y > 68 (leaves >= 30px vertical gap from y = -24)
+      const freeLanes = [0, 1, 2, 3].filter((lane) => {
+        const inLane = aliveEnemies.filter((e) => e.lane === lane);
+        return inLane.every((e) => e.y > 68);
+      });
+      if (freeLanes.length === 0) return;
+
+      const chosenLane = freeLanes[Math.floor(Math.random() * freeLanes.length)];
+      spawnEnemyInLane(chosenLane, -24);
+    }
+
+    function fireBullet() {
+      if (state.gameType !== "shooter" || state.gameOver || state.levelCleared) return;
+      const now = performance.now();
+      if (now - state.lastShotAt < 170) return;
+      state.lastShotAt = now;
+      getAudioCtx();
+
+      const dx = Math.cos(state.turretAngle);
+      const dy = Math.sin(state.turretAngle);
+      const barrelLen = 24;
+      state.bullets.push({
+        x: state.turretX + dx * barrelLen,
+        y: TURRET_Y + dy * barrelLen,
+        vx: dx * BULLET_SPEED,
+        vy: dy * BULLET_SPEED,
+        prep: state.selectedBall,
+        r: state.selectedBall.length >= 4 ? 15 : 13,
+        alive: true
+      });
+      playSFX("shoot");
+    }
+
+    function updateShooterPhysics(dt) {
+      if (state.gameOver || state.levelCleared) return;
+
+      // Turret movement via keyboard
+      const turretSpeed = 520;
+      if (state.keys.left) {
+        state.turretX -= turretSpeed * dt;
+        if (!state.mouse.inside) state.turretAngle = -Math.PI / 2;
+      }
+      if (state.keys.right) {
+        state.turretX += turretSpeed * dt;
+        if (!state.mouse.inside) state.turretAngle = -Math.PI / 2;
+      }
+      state.turretX = Math.max(44, Math.min(CANVAS_W - 44, state.turretX));
+
+      if (state.mouse.inside && state.mouse.y < TURRET_Y - 12) {
+        const dx = state.mouse.x - state.turretX;
+        const dy = state.mouse.y - TURRET_Y;
+        state.turretAngle = Math.max(-Math.PI + 0.22, Math.min(-0.22, Math.atan2(dy, dx)));
+      }
+
+      // Spawn enemies smoothly
+      const now = performance.now();
+      if (now - state.lastSpawnCheck > 550) {
+        state.lastSpawnCheck = now;
+        trySpawnShooterEnemy();
+      }
+
+      const fallSpeed = SHOOTER_SPEEDS[state.shooterSpeed];
+
+      // Move enemies down & check defense line breach
+      for (const e of state.enemies) {
+        if (!e.alive) continue;
+        e.y += fallSpeed * dt;
+        e.el.style.top = `${(e.y / CANVAS_H) * 100}%`;
+
+        // Update proximity danger bar
+        const progress = Math.max(0, Math.min(1, (e.y + e.h) / DEFENSE_Y));
+        if (e.dangerFill) {
+          e.dangerFill.style.width = `${Math.round(progress * 100)}%`;
+          e.dangerFill.style.backgroundColor =
+            progress > 0.78 ? themeColors.error : progress > 0.55 ? themeColors.warning : themeColors.primary;
+        }
+
+        if (e.y + e.h >= DEFENSE_Y) {
+          e.alive = false;
+          e.el.remove();
+          state.lives -= 1;
+          state.attempts += 1;
+          recordWrongAttempt(
+            e.item,
+            null,
+            e.x + e.w / 2,
+            DEFENSE_Y - 30,
+            null,
+            `漏接防線！正解為 ${e.item.full}`
+          );
+
+          if (state.lives <= 0) {
+            state.gameOver = true;
+            updateHeaderUI();
+            showOverlay(false);
+            return;
+          }
+          // Re-queue escaped item so learner must clear all 12 items to win
+          state.spawnQueue.push(e.item);
+          updateHeaderUI();
+        }
+      }
+
+      // Move bullets & check enemy hit
+      for (const b of state.bullets) {
+        if (!b.alive) continue;
+        b.x += b.vx * dt;
+        b.y += b.vy * dt;
+
+        if (b.x < -30 || b.x > CANVAS_W + 30 || b.y < -30) {
+          b.alive = false;
+          continue;
+        }
+
+        for (const e of state.enemies) {
+          if (!e.alive) continue;
+          const closestX = Math.max(e.x, Math.min(b.x, e.x + e.w));
+          const closestY = Math.max(e.y, Math.min(b.y, e.y + e.h));
+          const dx = b.x - closestX;
+          const dy = b.y - closestY;
+
+          if (dx * dx + dy * dy <= b.r * b.r) {
+            b.alive = false;
+            state.attempts += 1;
+            const cx = e.x + e.w / 2;
+            const cy = e.y + e.h / 2;
+
+            if (b.prep === e.item.prep) {
+              e.alive = false;
+              e.el.remove();
+              state.shooterClearedCount += 1;
+              recordCorrectMatch(e.item, cx, cy);
+              updateHeaderUI();
+
+              if (state.shooterClearedCount >= state.currentLevel.items.length) {
+                state.levelCleared = true;
+                showOverlay(true);
+                return;
+              }
+              trySpawnShooterEnemy();
+            } else {
+              spawnParticles(b.x, b.y, themeColors.error);
+              recordWrongAttempt(e.item, b.prep, cx, cy, e.el);
+              updateHeaderUI();
+            }
+            break;
+          }
+        }
+      }
+
+      state.bullets = state.bullets.filter((b) => b.alive);
+      state.enemies = state.enemies.filter((e) => e.alive);
+    }
+
+    // =========================================================================
+    // 10. Canvas Rendering + DOM Target Highlight Sync
     // =========================================================================
     function drawRoundedRect(x, y, w, h, r) {
       ctx.beginPath();
@@ -1389,6 +1910,27 @@
       }
     }
 
+    function drawBulletCircle(x, y, radius, prep, alpha = 1) {
+      const color = getBallColor(prep);
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.fill();
+
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = themeColors.card;
+      ctx.stroke();
+
+      ctx.fillStyle = "#ffffff";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.font = `700 ${prep.length >= 4 ? 10 : 12}px ui-monospace, Menlo, monospace`;
+      ctx.fillText(prep, x, y + 0.5);
+      ctx.restore();
+    }
+
     function draw() {
       const now = performance.now();
       ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
@@ -1396,107 +1938,122 @@
       ctx.fillStyle = themeColors.bg;
       ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
 
-      let aimPreview = null;
-      if (state.ball.docked && !state.gameOver && !state.levelCleared) {
-        aimPreview = computeAimPreview();
-      }
-
-      for (const b of state.bricks) {
-        if (!b.alive) continue;
-
-        const ox = now < b.shakeUntil ? Math.sin(now * 0.08) * 5 : 0;
-        const bx = b.x + ox;
-        const by = b.y;
-        const isAimTarget = aimPreview && aimPreview.targetBrick === b;
-        const isFlashing = now < b.flashUntil;
-
-        ctx.save();
-        drawRoundedRect(bx, by, b.w, b.h, 10);
-        ctx.fillStyle = themeColors.card;
-        ctx.fill();
-
-        ctx.lineWidth = isAimTarget || isFlashing ? 2 : 1;
-        ctx.strokeStyle = isFlashing
-          ? themeColors.error
-          : isAimTarget
-          ? themeColors.primary
-          : themeColors.border;
-        ctx.stroke();
-
-        if (b.item.group) {
-          const groupColorMap = { apply: "for", look: "in", result: "on", agree: "to", consist: "of" };
-          ctx.fillStyle = getBallColor(groupColorMap[b.item.group] || "with");
-          drawRoundedRect(bx + 6, by + 10, 4, b.h - 20, 2);
-          ctx.fill();
+      if (state.gameType === "breakout") {
+        let aimPreview = null;
+        if (state.ball.docked && !state.gameOver && !state.levelCleared) {
+          aimPreview = computeBreakoutAimPreview();
         }
 
+        // Sync aim target border on crisp DOM bricks
+        for (const b of state.bricks) {
+          if (!b.alive) continue;
+          const isTarget = Boolean(aimPreview && aimPreview.targetBrick === b);
+          b.el.classList.toggle("aim-target", isTarget);
+        }
+
+        if (aimPreview) {
+          ctx.save();
+          ctx.strokeStyle = getBallColor(state.selectedBall);
+          ctx.lineWidth = 2;
+          ctx.setLineDash([6, 6]);
+          ctx.globalAlpha = 0.78;
+          ctx.beginPath();
+          aimPreview.points.forEach((pt, idx) => {
+            if (idx === 0) ctx.moveTo(pt.x, pt.y);
+            else ctx.lineTo(pt.x, pt.y);
+          });
+          ctx.stroke();
+
+          const last = aimPreview.points[aimPreview.points.length - 1];
+          ctx.setLineDash([]);
+          ctx.beginPath();
+          ctx.arc(last.x, last.y, 4.5, 0, Math.PI * 2);
+          ctx.fillStyle = getBallColor(state.selectedBall);
+          ctx.fill();
+          ctx.restore();
+        }
+
+        // Paddle
+        ctx.save();
+        drawRoundedRect(state.paddleX - PADDLE_W / 2, PADDLE_Y, PADDLE_W, PADDLE_H, 7);
         ctx.fillStyle = themeColors.fg;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        const stemLen = b.item.stem.length;
-        ctx.font = `700 ${stemLen > 20 ? 12.5 : 14}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
-        ctx.fillText(b.item.stem, bx + b.w / 2 + (b.item.group ? 2 : 0), by + b.h / 2 - 10, b.w - 18);
-
-        ctx.fillStyle = themeColors.muted;
-        ctx.font = '500 12px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif';
-        ctx.fillText(`(${b.item.zh})`, bx + b.w / 2 + (b.item.group ? 2 : 0), by + b.h / 2 + 13, b.w - 16);
-        ctx.restore();
-      }
-
-      if (aimPreview) {
-        ctx.save();
-        ctx.strokeStyle = getBallColor(state.selectedBall);
-        ctx.lineWidth = 2;
-        ctx.setLineDash([6, 6]);
-        ctx.globalAlpha = 0.72;
-        ctx.beginPath();
-        aimPreview.points.forEach((pt, idx) => {
-          if (idx === 0) ctx.moveTo(pt.x, pt.y);
-          else ctx.lineTo(pt.x, pt.y);
-        });
-        ctx.stroke();
-
-        const last = aimPreview.points[aimPreview.points.length - 1];
-        ctx.setLineDash([]);
-        ctx.beginPath();
-        ctx.arc(last.x, last.y, 4.5, 0, Math.PI * 2);
-        ctx.fillStyle = getBallColor(state.selectedBall);
+        ctx.fill();
+        drawRoundedRect(state.paddleX - 16, PADDLE_Y + 4, 32, 4, 2);
+        ctx.fillStyle = themeColors.primary;
         ctx.fill();
         ctx.restore();
-      }
 
-      ctx.save();
-      drawRoundedRect(state.paddleX - PADDLE_W / 2, PADDLE_Y, PADDLE_W, PADDLE_H, 7);
-      ctx.fillStyle = themeColors.fg;
-      ctx.fill();
-      drawRoundedRect(state.paddleX - 16, PADDLE_Y + 4, 32, 4, 2);
-      ctx.fillStyle = themeColors.primary;
-      ctx.fill();
-      ctx.restore();
-
-      if (!state.gameOver && !state.levelCleared) {
-        const ballColor = getBallColor(state.selectedBall);
-        const radius = state.selectedBall.length >= 4 ? BALL_R + 5 : BALL_R + 2;
+        if (!state.gameOver && !state.levelCleared) {
+          const radius = state.selectedBall.length >= 4 ? BALL_R + 5 : BALL_R + 2;
+          drawBulletCircle(state.ball.x, state.ball.y, radius, state.selectedBall, state.ball.cooling ? 0.62 : 1);
+        }
+      } else {
+        // Shooter Mode: Defense line + Laser sight + Bullets + Turret
         ctx.save();
-        if (state.ball.cooling) ctx.globalAlpha = 0.62;
-
+        ctx.strokeStyle = themeColors.border;
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([8, 6]);
         ctx.beginPath();
-        ctx.arc(state.ball.x, state.ball.y, radius, 0, Math.PI * 2);
-        ctx.fillStyle = ballColor;
-        ctx.fill();
-
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = themeColors.card;
+        ctx.moveTo(16, DEFENSE_Y);
+        ctx.lineTo(CANVAS_W - 16, DEFENSE_Y);
         ctx.stroke();
-
-        ctx.fillStyle = "#ffffff";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.font = `700 ${state.selectedBall.length >= 4 ? 10 : 12}px ui-monospace, Menlo, monospace`;
-        ctx.fillText(state.selectedBall, state.ball.x, state.ball.y + 0.5);
         ctx.restore();
+
+        let aimPreview = null;
+        if (!state.gameOver && !state.levelCleared) {
+          aimPreview = computeShooterAimPreview();
+        }
+
+        for (const e of state.enemies) {
+          if (!e.alive) continue;
+          const isTarget = Boolean(aimPreview && aimPreview.targetEnemy === e);
+          e.el.classList.toggle("aim-target", isTarget);
+        }
+
+        if (aimPreview) {
+          ctx.save();
+          ctx.strokeStyle = getBallColor(state.selectedBall);
+          ctx.lineWidth = 1.8;
+          ctx.setLineDash([5, 6]);
+          ctx.globalAlpha = 0.65;
+          ctx.beginPath();
+          ctx.moveTo(aimPreview.points[0].x, aimPreview.points[0].y);
+          ctx.lineTo(aimPreview.points[1].x, aimPreview.points[1].y);
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        // Active bullets
+        for (const b of state.bullets) {
+          if (b.alive) drawBulletCircle(b.x, b.y, b.r, b.prep, 1);
+        }
+
+        // Turret Cannon
+        if (!state.gameOver && !state.levelCleared) {
+          const activeColor = getBallColor(state.selectedBall);
+          ctx.save();
+          ctx.translate(state.turretX, TURRET_Y);
+
+          // Base track
+          drawRoundedRect(-28, 6, 56, 12, 6);
+          ctx.fillStyle = themeColors.fg;
+          ctx.fill();
+
+          // Rotating barrel
+          ctx.save();
+          ctx.rotate(state.turretAngle + Math.PI / 2);
+          drawRoundedRect(-6, -28, 12, 26, 4);
+          ctx.fillStyle = activeColor;
+          ctx.fill();
+          ctx.restore();
+
+          // Loaded chamber badge
+          ctx.restore();
+          drawBulletCircle(state.turretX, TURRET_Y + 2, state.selectedBall.length >= 4 ? 14 : 12, state.selectedBall, 1);
+        }
       }
 
+      // Shared Particles
       state.particles = state.particles.filter((p) => now - p.born < p.duration);
       for (const p of state.particles) {
         const t = (now - p.born) / p.duration;
@@ -1508,46 +2065,10 @@
         ctx.fill();
         ctx.restore();
       }
-
-      state.floaters = state.floaters.filter((f) => now - f.born < f.duration);
-      for (const f of state.floaters) {
-        const t = (now - f.born) / f.duration;
-        const alpha = t < 0.72 ? 1 : 1 - (t - 0.72) / 0.28;
-        const rise = t * 28;
-        const fy = Math.max(26, f.y - rise);
-
-        ctx.save();
-        ctx.globalAlpha = alpha;
-        ctx.font = '700 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-        const w1 = ctx.measureText(f.text).width;
-        ctx.font = '500 12px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif';
-        const w2 = ctx.measureText(f.subtext).width;
-        const boxW = Math.min(CANVAS_W - 32, Math.max(w1, w2) + 28);
-        const boxH = 44;
-        const fx = Math.max(16, Math.min(CANVAS_W - boxW - 16, f.x - boxW / 2));
-
-        drawRoundedRect(fx, fy - boxH / 2, boxW, boxH, 8);
-        ctx.fillStyle = themeColors.card;
-        ctx.fill();
-        ctx.lineWidth = 1.5;
-        ctx.strokeStyle = f.isSuccess ? themeColors.success : themeColors.error;
-        ctx.stroke();
-
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillStyle = f.isSuccess ? themeColors.success : themeColors.error;
-        ctx.font = '700 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-        ctx.fillText(f.text, fx + boxW / 2, fy - 8, boxW - 16);
-
-        ctx.fillStyle = themeColors.fg;
-        ctx.font = '500 12px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif';
-        ctx.fillText(f.subtext, fx + boxW / 2, fy + 10, boxW - 16);
-        ctx.restore();
-      }
     }
 
     // =========================================================================
-    // 8. UI Rendering & Controls
+    // 11. UI Rendering & Controls
     // =========================================================================
     function renderLevelTabs() {
       const container = document.getElementById("levelTabs");
@@ -1609,8 +2130,10 @@
     }
 
     function updateHeaderUI() {
-      const total = state.bricks.length;
-      const cleared = state.bricks.filter((b) => !b.alive).length;
+      const total = state.currentLevel.items.length;
+      const cleared = state.gameType === "breakout"
+        ? state.bricks.filter((b) => !b.alive).length
+        : state.shooterClearedCount;
       const acc = state.attempts === 0 ? 100 : Math.round((cleared / state.attempts) * 100);
 
       document.getElementById("statProgress").textContent = `${cleared}/${total}`;
@@ -1621,16 +2144,43 @@
       document.getElementById("levelBadge").textContent = state.currentLevel.short;
       document.getElementById("levelDesc").textContent = state.currentLevel.desc;
 
-      const aimBtn = document.getElementById("modeAimBtn");
-      const arcBtn = document.getElementById("modeArcadeBtn");
-      if (state.mode === "aim") {
-        aimBtn.className = "seg-btn active";
-        arcBtn.className = "seg-btn";
-        document.getElementById("modeHint").textContent = "瞄準模式：回板自動吸附，先選好介係詞再發射";
+      const gameBrkBtn = document.getElementById("gameBreakoutBtn");
+      const gameShtBtn = document.getElementById("gameShooterBtn");
+      const brkCtrls = document.getElementById("breakoutSubControls");
+      const shtCtrls = document.getElementById("shooterSubControls");
+
+      if (state.gameType === "breakout") {
+        gameBrkBtn.className = "seg-btn active";
+        gameShtBtn.className = "seg-btn";
+        brkCtrls.classList.remove("hidden");
+        shtCtrls.classList.add("hidden");
+        document.getElementById("rackTitle").textContent = "選擇介係詞球（點擊、數字鍵 1–9 或滾輪切換）：";
+        document.getElementById("rackControlsHint").textContent = "A / D 或 ← / → 移動擋板・點擊或空白鍵發射";
+
+        const aimBtn = document.getElementById("modeAimBtn");
+        const arcBtn = document.getElementById("modeArcadeBtn");
+        if (state.mode === "aim") {
+          aimBtn.className = "seg-btn active";
+          arcBtn.className = "seg-btn";
+          document.getElementById("modeHint").textContent = "瞄準模式：回板自動吸附，先選好介係詞再發射";
+        } else {
+          arcBtn.className = "seg-btn active";
+          aimBtn.className = "seg-btn";
+          document.getElementById("modeHint").textContent = "街機模式：球持續反彈，飛行中用 1–9 或滾輪換球";
+        }
       } else {
-        arcBtn.className = "seg-btn active";
-        aimBtn.className = "seg-btn";
-        document.getElementById("modeHint").textContent = "街機模式：球持續反彈，飛行中用 1–9 或滾輪換球";
+        gameShtBtn.className = "seg-btn active";
+        gameBrkBtn.className = "seg-btn";
+        brkCtrls.classList.add("hidden");
+        shtCtrls.classList.remove("hidden");
+        document.getElementById("rackTitle").textContent = "選擇介係詞子彈（點擊、1–9、Q/E 或滾輪切換）：";
+        document.getElementById("rackControlsHint").textContent = "滑鼠瞄準點擊射擊，或 A / D 移動砲台＋空白鍵開火";
+        document.getElementById("modeHint").textContent = "防衛槍戰：在題目掉落到底部防線前，用正確介係詞子彈擊落！";
+
+        ["slow", "normal", "fast"].forEach((spd) => {
+          const id = spd === "slow" ? "speedSlowBtn" : spd === "normal" ? "speedNormalBtn" : "speedFastBtn";
+          document.getElementById(id).className = state.shooterSpeed === spd ? "seg-btn active" : "seg-btn";
+        });
       }
 
       const ttsLabels = { phrase: "語音：片語", sentence: "語音：例句", off: "語音：關" };
@@ -1658,8 +2208,8 @@
         if (state.matchedLog.length === 0) {
           content.innerHTML = `
             <div class="empty-state">
-              <div class="empty-title">尚未消除任何磚塊</div>
-              <div>在左側選擇正確介係詞球並擊中對應磚塊，完整配對、中文釋義與多益例句會即時收入這裡。</div>
+              <div class="empty-title">尚未消除任何題目</div>
+              <div>選擇正確介係詞擊中上方目標，完整配對、中文釋義與多益例句會即時收入這裡。</div>
             </div>`;
           return;
         }
@@ -1687,7 +2237,7 @@
           content.innerHTML = `
             <div class="empty-state">
               <div class="empty-title">目前沒有錯題紀錄</div>
-              <div>答錯的片語與陷阱解析會自動收集在此，方便隨時開啟錯題特訓。</div>
+              <div>答錯或漏接的片語與陷阱解析會自動收集在此，方便隨時開啟錯題特訓。</div>
             </div>`;
           return;
         }
@@ -1697,7 +2247,7 @@
           card.innerHTML = `
             <div class="card-head">
               <span class="card-phrase">${item.full}</span>
-              <span class="card-err">曾誤選 ${wrongPrep}</span>
+              <span class="card-err">${wrongPrep === "漏接" ? "曾漏接防線" : `曾誤選 ${wrongPrep}`}</span>
             </div>
             <div style="font-size:12px; font-weight:600;">${item.meaning}</div>
             <div class="card-warn">${reason}</div>
@@ -1730,8 +2280,10 @@
 
     function showOverlay(isWin) {
       const modal = document.getElementById("overlayModal");
-      const total = state.bricks.length;
-      const cleared = state.bricks.filter((b) => !b.alive).length;
+      const total = state.currentLevel.items.length;
+      const cleared = state.gameType === "breakout"
+        ? state.bricks.filter((b) => !b.alive).length
+        : state.shooterClearedCount;
       const acc = state.attempts === 0 ? 100 : Math.round((cleared / state.attempts) * 100);
 
       document.getElementById("overlayTag").textContent = isWin ? "LEVEL COMPLETE" : "SHIELD DEPLETED";
@@ -1756,7 +2308,7 @@
     }
 
     // =========================================================================
-    // 9. Event Listeners & Main Loop
+    // 12. Event Listeners & Main Loop
     // =========================================================================
     function getCanvasCoords(clientX, clientY) {
       const rect = canvas.getBoundingClientRect();
@@ -1772,25 +2324,40 @@
       state.mouse.y = pt.y;
       state.mouse.inside = true;
 
-      if (state.mode === "arcade" || !state.ball.docked || pt.y >= PADDLE_Y - 10) {
-        state.paddleX = Math.max(PADDLE_W / 2 + 8, Math.min(CANVAS_W - PADDLE_W / 2 - 8, pt.x));
+      if (state.gameType === "breakout") {
+        if (state.mode === "arcade" || !state.ball.docked || pt.y >= PADDLE_Y - 10) {
+          state.paddleX = Math.max(PADDLE_W / 2 + 8, Math.min(CANVAS_W - PADDLE_W / 2 - 8, pt.x));
+        }
+      } else if (pt.y >= DEFENSE_Y) {
+        state.turretX = Math.max(44, Math.min(CANVAS_W - 44, pt.x));
       }
     });
 
     canvas.addEventListener("pointerleave", () => { state.mouse.inside = false; });
 
     canvas.addEventListener("pointerdown", (e) => {
+      if (e.button === 2) return;
       const pt = getCanvasCoords(e.clientX, e.clientY);
       state.mouse.x = pt.x;
       state.mouse.y = pt.y;
       state.mouse.inside = true;
-      if (state.ball.docked && pt.y < PADDLE_Y - 12) {
-        const dx = pt.x - state.ball.x;
-        const dy = pt.y - state.ball.y;
-        state.aimAngle = Math.max(-Math.PI + 0.24, Math.min(-0.24, Math.atan2(dy, dx)));
-        launchBall();
-      } else if (state.ball.docked) {
-        launchBall();
+
+      if (state.gameType === "breakout") {
+        if (state.ball.docked && pt.y < PADDLE_Y - 12) {
+          const dx = pt.x - state.ball.x;
+          const dy = pt.y - state.ball.y;
+          state.aimAngle = Math.max(-Math.PI + 0.24, Math.min(-0.24, Math.atan2(dy, dx)));
+          launchBall();
+        } else if (state.ball.docked) {
+          launchBall();
+        }
+      } else {
+        if (pt.y < TURRET_Y - 12) {
+          const dx = pt.x - state.turretX;
+          const dy = pt.y - TURRET_Y;
+          state.turretAngle = Math.max(-Math.PI + 0.22, Math.min(-0.22, Math.atan2(dy, dx)));
+        }
+        fireBullet();
       }
     });
 
@@ -1803,11 +2370,21 @@
     }, { passive: false });
 
     window.addEventListener("keydown", (e) => {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
       if (e.key === "ArrowLeft" || e.key.toLowerCase() === "a") state.keys.left = true;
       if (e.key === "ArrowRight" || e.key.toLowerCase() === "d") state.keys.right = true;
+      if (e.key.toLowerCase() === "q") {
+        const idx = state.availableBalls.indexOf(state.selectedBall);
+        selectBall(state.availableBalls[(idx - 1 + state.availableBalls.length) % state.availableBalls.length]);
+      }
+      if (e.key.toLowerCase() === "e") {
+        const idx = state.availableBalls.indexOf(state.selectedBall);
+        selectBall(state.availableBalls[(idx + 1) % state.availableBalls.length]);
+      }
       if (e.code === "Space") {
         e.preventDefault();
-        launchBall();
+        if (state.gameType === "breakout") launchBall();
+        else fireBullet();
       }
       if (/^[1-9]$/.test(e.key)) {
         const idx = parseInt(e.key, 10) - 1;
@@ -1820,6 +2397,21 @@
       if (e.key === "ArrowRight" || e.key.toLowerCase() === "d") state.keys.right = false;
     });
 
+    // Game Switchers
+    document.getElementById("gameBreakoutBtn").addEventListener("click", () => {
+      if (state.gameType === "breakout") return;
+      state.gameType = "breakout";
+      if (state.isMistakeDrill && state.mistakeLog.length > 0) loadLevel(0, state.mistakeLog.map((m) => m.item));
+      else loadLevel(state.levelIdx);
+    });
+    document.getElementById("gameShooterBtn").addEventListener("click", () => {
+      if (state.gameType === "shooter") return;
+      state.gameType = "shooter";
+      if (state.isMistakeDrill && state.mistakeLog.length > 0) loadLevel(0, state.mistakeLog.map((m) => m.item));
+      else loadLevel(state.levelIdx);
+    });
+
+    // Breakout sub-modes
     document.getElementById("modeAimBtn").addEventListener("click", () => {
       state.mode = "aim";
       updateHeaderUI();
@@ -1829,6 +2421,21 @@
       if (state.ball.docked) launchBall();
       updateHeaderUI();
     });
+
+    // Shooter speed controls
+    document.getElementById("speedSlowBtn").addEventListener("click", () => {
+      state.shooterSpeed = "slow";
+      updateHeaderUI();
+    });
+    document.getElementById("speedNormalBtn").addEventListener("click", () => {
+      state.shooterSpeed = "normal";
+      updateHeaderUI();
+    });
+    document.getElementById("speedFastBtn").addEventListener("click", () => {
+      state.shooterSpeed = "fast";
+      updateHeaderUI();
+    });
+
     document.getElementById("ttsModeBtn").addEventListener("click", () => {
       const order = ["phrase", "sentence", "off"];
       state.ttsMode = order[(order.indexOf(state.ttsMode) + 1) % order.length];
@@ -1883,13 +2490,14 @@
     function loop(now) {
       const dt = Math.min(0.032, (now - lastTime) / 1000);
       lastTime = now;
-      updatePhysics(dt);
+      if (state.gameType === "breakout") updateBreakoutPhysics(dt);
+      else updateShooterPhysics(dt);
       draw();
       requestAnimationFrame(loop);
     }
 
     applyTheme(state.theme);
-    resizeCanvasHiDPI();
+    syncCanvasResolution();
     loadLevel(0);
     requestAnimationFrame(loop);
   </script>
